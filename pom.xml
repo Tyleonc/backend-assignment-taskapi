@@ -12,7 +12,7 @@
     <artifactId>demo</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>backend-assignment-taskapi</name>
-    <description>backend service built Spring Boot, integrating MySQL, Redis, and RocketMQ.</description>
+    <description>backend service built with Spring Boot, integrating MySQL, Redis, and RocketMQ.</description>
 
     <properties>
         <java.version>21</java.version>
