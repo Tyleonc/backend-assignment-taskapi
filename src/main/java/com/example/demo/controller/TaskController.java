@@ -13,7 +13,6 @@ public class TaskController {
 
     @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> createTask(@Valid @RequestBody CreateTaskRequest request) {
-        //TODO: add test
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
