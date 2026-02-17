@@ -1,9 +1,13 @@
 spring:
   application:
-    name: demo
+    name: backend-assignment-taskapi
 
 # define mysql properties here
-
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306
+    username: ${DB_USERNAME:taskuser}
+    password: ${DB_PASSWORD:taskpass}
 # define redis properties here
 
 # define rocketmq properties here
