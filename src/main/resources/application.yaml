@@ -10,7 +10,7 @@ spring:
   # define mysql properties here
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:taskdb}?serverTimezone=UTC
     username: ${DB_USERNAME:taskuser}
     password: ${DB_PASSWORD:taskpass}
 # define redis properties here
