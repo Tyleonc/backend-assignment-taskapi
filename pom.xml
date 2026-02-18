@@ -9,7 +9,7 @@
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example</groupId>
-    <artifactId>demo</artifactId>
+    <artifactId>backend-assignment-taskapi</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>backend-assignment-taskapi</name>
     <description>backend service built with Spring Boot, integrating MySQL, Redis, and RocketMQ.</description>
