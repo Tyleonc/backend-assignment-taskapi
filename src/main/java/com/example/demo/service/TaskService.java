@@ -1,9 +1,12 @@
 package com.example.demo.service;
 
 import com.example.demo.entity.ScheduledTaskEntity;
+import com.example.demo.exception.TaskExistsException;
 import com.example.demo.model.request.CreateTaskRequest;
 import com.example.demo.model.response.TaskResponse;
 import com.example.demo.repository.TaskRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 
 @Service
+@Slf4j
 public class TaskService {
 
     private static final String REDIS_TASK_KEY = "tasks:delayed";
@@ -25,16 +29,28 @@ public class TaskService {
 
     @Transactional
     public void createTask(CreateTaskRequest request) {
+        String taskId = request.taskId();
+        if (taskRepository.existsByTaskId(taskId)) {
+            log.warn("Create task rejected - duplicate taskId found: {}", taskId);
+            throw new TaskExistsException(taskId);
+        }
+
         ScheduledTaskEntity scheduledTask = new ScheduledTaskEntity();
-        scheduledTask.setTaskId(request.taskId());
+        scheduledTask.setTaskId(taskId);
         scheduledTask.setExecuteAt(request.executeAt());
         scheduledTask.setCreatedAt(Instant.now());
         scheduledTask.setUpdatedAt(Instant.now());
         scheduledTask.setPayload(request.payload());
-        taskRepository.save(scheduledTask);
+
+        try {
+            taskRepository.save(scheduledTask);
+        }catch (DataIntegrityViolationException e) {
+            log.warn("Create task rejected - database constraint at taskId : {}", taskId);
+            throw new TaskExistsException(taskId);
+        }
 
         long score = request.executeAt().toEpochMilli();
-        redisTemplate.opsForZSet().add(REDIS_TASK_KEY, request.taskId(), score);
+        redisTemplate.opsForZSet().add(REDIS_TASK_KEY, taskId, score);
     }
 
 
