@@ -29,7 +29,7 @@ class TaskControllerTest {
     private ObjectMapper objectMapper;
 
     @Test
-    void shouldReturn201WhenTaskCreated() throws Exception {
+    void createTask_shouldReturn201_whenValidRequest() throws Exception {
 
         CreateTaskRequest body = new CreateTaskRequest(
                 "abc-123",
