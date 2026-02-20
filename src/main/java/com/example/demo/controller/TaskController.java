@@ -1,15 +1,21 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.request.CreateTaskRequest;
+import com.example.demo.model.response.TaskResponse;
 import com.example.demo.service.TaskService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.net.URI;
 
 @RestController
 @RequestMapping("/tasks")
@@ -24,7 +30,21 @@ public class TaskController {
     @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> createTask(@Valid @RequestBody CreateTaskRequest request) {
         taskService.createTask(request);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.created(URI.create("/tasks/" + request.taskId())).build();
     }
+
+
+    @GetMapping("/{taskId}")
+    public ResponseEntity<TaskResponse> getTask(@PathVariable String taskId) {
+        return ResponseEntity.ok(taskService.getTask(taskId));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> cancelTask(@PathVariable String id) {
+        taskService.cancelTask(id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    //TODO: implement list task endpoint
 
 }
