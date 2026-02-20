@@ -1,6 +1,7 @@
 package com.example.demo.entity;
 
 import com.example.demo.model.Payload;
+import com.example.demo.model.TaskStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -42,7 +43,7 @@ public class ScheduledTaskEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private Status status = Status.PENDING;
+    private TaskStatus status;
 
     @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "DATETIME(3)")
     private Instant createdAt;
@@ -50,11 +51,4 @@ public class ScheduledTaskEntity {
     @Column(name = "updated_at", nullable = false, columnDefinition = "DATETIME(3)")
     private Instant updatedAt;
 
-    public enum Status {
-        PENDING,
-        PROCESSING,
-        TRIGGERED,
-        FAILED,
-        CANCELLED
-    }
 }
