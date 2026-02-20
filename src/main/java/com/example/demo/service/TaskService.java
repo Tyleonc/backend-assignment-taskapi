@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.entity.ScheduledTaskEntity;
 import com.example.demo.exception.TaskExistsException;
+import com.example.demo.model.TaskStatus;
 import com.example.demo.model.request.CreateTaskRequest;
 import com.example.demo.model.response.ListTaskResponse;
 import com.example.demo.model.response.TaskResponse;
@@ -65,7 +66,7 @@ public class TaskService {
         //TODO: implement logic
     }
 
-    public ListTaskResponse listTasks(String status, Pageable pageable) {
+    public ListTaskResponse listTasks(TaskStatus status, Pageable pageable) {
         //TODO: implement logic
         return null;
     }
