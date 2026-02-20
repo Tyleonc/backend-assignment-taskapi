@@ -47,9 +47,9 @@ public class TaskController {
         return ResponseEntity.ok(taskService.getTask(taskId));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> cancelTask(@PathVariable String id) {
-        taskService.cancelTask(id);
+    @DeleteMapping("/{taskId}")
+    public ResponseEntity<Void> cancelTask(@PathVariable String taskId) {
+        taskService.cancelTask(taskId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
