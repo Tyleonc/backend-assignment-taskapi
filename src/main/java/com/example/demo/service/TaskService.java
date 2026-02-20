@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.entity.ScheduledTaskEntity;
 import com.example.demo.model.request.CreateTaskRequest;
+import com.example.demo.model.response.TaskResponse;
 import com.example.demo.repository.TaskRepository;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -34,6 +35,16 @@ public class TaskService {
 
         long score = request.executeAt().toEpochMilli();
         redisTemplate.opsForZSet().add(REDIS_TASK_KEY, request.taskId(), score);
+    }
+
+
+    public TaskResponse getTask(String taskId) {
+        //TODO: implement logic
+        return new TaskResponse(taskId, null, null,null);
+    }
+
+    public void cancelTask(String taskId) {
+        //TODO: implement logic
     }
 
 }
