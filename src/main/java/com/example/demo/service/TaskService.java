@@ -3,10 +3,12 @@ package com.example.demo.service;
 import com.example.demo.entity.ScheduledTaskEntity;
 import com.example.demo.exception.TaskExistsException;
 import com.example.demo.model.request.CreateTaskRequest;
+import com.example.demo.model.response.ListTaskResponse;
 import com.example.demo.model.response.TaskResponse;
 import com.example.demo.repository.TaskRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,6 +63,11 @@ public class TaskService {
 
     public void cancelTask(String taskId) {
         //TODO: implement logic
+    }
+
+    public ListTaskResponse listTasks(String status, Pageable pageable) {
+        //TODO: implement logic
+        return null;
     }
 
 }
