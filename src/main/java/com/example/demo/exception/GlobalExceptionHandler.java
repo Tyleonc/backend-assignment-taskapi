@@ -54,4 +54,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(detail);
     }
 
+    @ExceptionHandler(TaskNotFoundException.class)
+    public ResponseEntity<ProblemDetail> handleTaskNotFound(MethodArgumentNotValidException ex, HttpServletRequest request) {
+        ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+        detail.setType(URI.create(""));
+        detail.setTitle("Task Not Found");
+        detail.setInstance(URI.create(request.getRequestURI()));
+        detail.setProperty("timestamp", Instant.now());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(detail);
+    }
+
 }
