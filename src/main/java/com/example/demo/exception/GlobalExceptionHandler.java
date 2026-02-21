@@ -4,85 +4,55 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
-import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.net.URI;
 import java.time.Instant;
-import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    //TODO: reduce boilertemplate and optimize title source
-
-    @ExceptionHandler(TaskExistsException.class)
-    public ResponseEntity<ProblemDetail> handleTaskExists(TaskExistsException ex, HttpServletRequest request) {
-        ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
-        detail.setType(URI.create(""));
-        detail.setTitle("Duplicate Task ID");
-        detail.setInstance(URI.create(request.getRequestURI()));
-        detail.setProperty("timestamp", Instant.now());
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(detail);
+    @ExceptionHandler({TaskExistsException.class, TaskUncancelableException.class})
+    public ProblemDetail handleConflict(Exception ex, HttpServletRequest request) {
+        String title = (ex instanceof TaskExistsException) ? "Duplicate Task ID" : "Task State Conflict";
+        return createDetail(HttpStatus.CONFLICT, title, ex.getMessage(), request);
     }
 
-    @ExceptionHandler(InvalidTaskStatusException.class)
-    public ResponseEntity<ProblemDetail> handleInvalidTaskStatus(InvalidTaskStatusException ex, HttpServletRequest request) {
-        ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
-        detail.setType(URI.create(""));
-        detail.setTitle("Invalid Task Status");
-        detail.setInstance(URI.create(request.getRequestURI()));
-        detail.setProperty("timestamp", Instant.now());
-        return ResponseEntity.badRequest().body(detail);
+    @ExceptionHandler({InvalidTaskStatusException.class, ConstraintViolationException.class})
+    public ProblemDetail handleBadRequest(Exception ex, HttpServletRequest request) {
+        String title = (ex instanceof InvalidTaskStatusException) ? "Invalid Task Status" : "Invalid Request Parameter";
+        return createDetail(HttpStatus.BAD_REQUEST, title, ex.getMessage(), request);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ProblemDetail> handleValidationException(MethodArgumentNotValidException ex, HttpServletRequest request) {
-        ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Request validation failed");
-        detail.setType(URI.create(""));
-        detail.setTitle("Validation Failed");
-        detail.setInstance(URI.create(request.getRequestURI()));
-        detail.setProperty("timestamp", Instant.now());
+    public ProblemDetail handleValidationException(MethodArgumentNotValidException ex, HttpServletRequest request) {
+        ProblemDetail detail = createDetail(HttpStatus.BAD_REQUEST, "Validation Failed", "Request validation failed", request);
 
-        List<Map<String, String>> errors = ex.getBindingResult().getFieldErrors().stream()
-                .map(err -> Map.of(err.getField(), err.getDefaultMessage()))
-                .toList();
+        Map<String, String> errors = ex.getBindingResult().getFieldErrors().stream()
+                .collect(Collectors.toMap(FieldError::getField,
+                        err -> err.getDefaultMessage() != null ? err.getDefaultMessage() : "Invalid value"));
 
-        detail.setProperty("Error fields", errors);
-        return ResponseEntity.badRequest().body(detail);
+        detail.setProperty("errors", errors);
+        return detail;
     }
 
     @ExceptionHandler(TaskNotFoundException.class)
-    public ResponseEntity<ProblemDetail> handleTaskNotFound(TaskNotFoundException ex, HttpServletRequest request) {
-        ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
-        detail.setType(URI.create(""));
-        detail.setTitle("Task Not Found");
-        detail.setInstance(URI.create(request.getRequestURI()));
-        detail.setProperty("timestamp", Instant.now());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(detail);
+    public ProblemDetail handleTaskNotFound(TaskNotFoundException ex, HttpServletRequest request) {
+        return createDetail(HttpStatus.NOT_FOUND, "Task Not Found", ex.getMessage(), request);
     }
 
-    @ExceptionHandler(TaskUncancelableException.class)
-    public ResponseEntity<ProblemDetail> handleTaskUncancelable(TaskUncancelableException ex, HttpServletRequest request) {
-        ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
-        detail.setType(URI.create(""));
-        detail.setTitle("Task State Conflict");
+    private ProblemDetail createDetail(HttpStatus status, String title, String message, HttpServletRequest request) {
+        ProblemDetail detail = ProblemDetail.forStatusAndDetail(status, message);
+        detail.setTitle(title);
+        detail.setType(URI.create("about:blank"));
         detail.setInstance(URI.create(request.getRequestURI()));
         detail.setProperty("timestamp", Instant.now());
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(detail);
-    }
-
-    @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ProblemDetail> handleConstraintViolation(ConstraintViolationException ex, HttpServletRequest request) {
-        ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
-        detail.setType(URI.create(""));
-        detail.setTitle("Invalid Request Parameter");
-        detail.setInstance(URI.create(request.getRequestURI()));
-        detail.setProperty("timestamp", Instant.now());
-        return ResponseEntity.badRequest().body(detail);
+        return detail;
     }
 
 }
