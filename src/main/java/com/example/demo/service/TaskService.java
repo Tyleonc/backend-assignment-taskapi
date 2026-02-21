@@ -46,8 +46,6 @@ public class TaskService {
         ScheduledTaskEntity scheduledTask = new ScheduledTaskEntity();
         scheduledTask.setTaskId(taskId);
         scheduledTask.setExecuteAt(request.executeAt());
-        scheduledTask.setCreatedAt(Instant.now());
-        scheduledTask.setUpdatedAt(Instant.now());
         scheduledTask.setPayload(request.payload());
 
         try {
