@@ -1,6 +1,6 @@
 package com.example.demo;
 
-import com.example.demo.config.WebMvcTestConfig;
+import com.example.demo.config.TestConfig;
 import com.example.demo.controller.TaskController;
 import com.example.demo.exception.GlobalExceptionHandler;
 import com.example.demo.exception.TaskExistsException;
@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Import({WebMvcTestConfig.class, GlobalExceptionHandler.class})
+@Import({TestConfig.class, GlobalExceptionHandler.class})
 @WebMvcTest(value = TaskController.class)
 class TaskControllerTest {
 
