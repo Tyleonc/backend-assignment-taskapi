@@ -3,10 +3,9 @@ package com.example.demo.model;
 import jakarta.validation.constraints.NotBlank;
 
 public record Payload(
-        @NotBlank
+        @NotBlank(message = "Payload type must be provided")
         String type,
-        @NotBlank
+        @NotBlank(message = "Payload target must be provided")
         String target,
-        @NotBlank
         String message
 ) {}
