@@ -62,7 +62,7 @@ class TaskControllerTest {
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.status").value(409))
                 .andExpect(jsonPath("$.title").value("Duplicate Task ID"))
-                .andExpect(jsonPath("$.detail").value("Task already exists: abc-123"))
+                .andExpect(jsonPath("$.detail").value("task already exists: abc-123"))
                 .andExpect(jsonPath("$.instance").value("/tasks"));
     }
 
