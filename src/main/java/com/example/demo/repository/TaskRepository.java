@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.Instant;
 import java.util.Optional;
 
 public interface TaskRepository extends JpaRepository<ScheduledTaskEntity, Long> {
@@ -13,6 +14,8 @@ public interface TaskRepository extends JpaRepository<ScheduledTaskEntity, Long>
     boolean existsByTaskId(String taskId);
 
     Optional<ScheduledTaskEntity> findByTaskId(String taskId);
+
+    Page<ScheduledTaskEntity> findByStatusAndExecuteAtAfter(TaskStatus status, Instant executeAt, Pageable pageable);
 
     Page<ScheduledTaskEntity> findByStatus(TaskStatus status, Pageable pageable);
 }
