@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.entity.ScheduledTaskEntity;
 import com.example.demo.exception.TaskExistsException;
+import com.example.demo.exception.TaskNotFoundException;
 import com.example.demo.model.TaskStatus;
 import com.example.demo.model.request.CreateTaskRequest;
 import com.example.demo.model.response.ListTaskResponse;
@@ -56,10 +57,11 @@ public class TaskService {
         redisTemplate.opsForZSet().add(REDIS_TASK_KEY, taskId, score);
     }
 
-
+    @Transactional(readOnly = true)
     public TaskResponse getTask(String taskId) {
-        //TODO: implement logic
-        return new TaskResponse(taskId, null, null,null);
+        return taskRepository.findByTaskId(taskId)
+                .map(this::toTaskResponse)
+                .orElseThrow(() -> new TaskNotFoundException(taskId));
     }
 
     public void cancelTask(String taskId) {
@@ -69,6 +71,15 @@ public class TaskService {
     public ListTaskResponse listTasks(TaskStatus status, Pageable pageable) {
         //TODO: implement logic
         return null;
+    }
+
+    private TaskResponse toTaskResponse(ScheduledTaskEntity entity) {
+        return new TaskResponse(
+                entity.getTaskId(),
+                entity.getStatus(),
+                entity.getPayload(),
+                entity.getExecuteAt()
+        );
     }
 
 }
