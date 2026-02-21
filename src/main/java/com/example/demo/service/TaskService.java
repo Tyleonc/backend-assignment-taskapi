@@ -7,16 +7,19 @@ import com.example.demo.exception.TaskUncancelableException;
 import com.example.demo.model.TaskStatus;
 import com.example.demo.model.request.CreateTaskRequest;
 import com.example.demo.model.response.ListTaskResponse;
+import com.example.demo.model.response.PageInfo;
 import com.example.demo.model.response.TaskResponse;
 import com.example.demo.repository.TaskRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -81,9 +84,23 @@ public class TaskService {
         entity.setStatus(TaskStatus.CANCELLED);
     }
 
+    @Transactional(readOnly = true)
     public ListTaskResponse listTasks(TaskStatus status, Pageable pageable) {
-        //TODO: implement logic
-        return null;
+        TaskStatus queryStatus = (status == null) ? TaskStatus.PENDING : status;
+        Page<ScheduledTaskEntity> taskEntities = taskRepository.findByStatus(queryStatus, pageable);
+
+        List<TaskResponse> data = taskEntities.getContent().stream()
+                .map(this::toTaskResponse)
+                .toList();
+
+        PageInfo pageInfo = new PageInfo(
+                taskEntities.getNumber(),
+                taskEntities.getSize(),
+                taskEntities.getTotalElements(),
+                taskEntities.getTotalPages()
+        );
+
+        return new ListTaskResponse(data, pageInfo);
     }
 
     private TaskResponse toTaskResponse(ScheduledTaskEntity entity) {
