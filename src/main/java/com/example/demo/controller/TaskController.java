@@ -55,9 +55,10 @@ public class TaskController {
     @GetMapping("")
     public ResponseEntity<ListTaskResponse> getTaskList(
             @RequestParam(required = false) TaskStatus status,
-            @RequestParam(defaultValue = "0") @Min(0) int page,
-            @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size) {
-        return ResponseEntity.ok(taskService.listTasks(status, PageRequest.of(page, size)));
+            @RequestParam(defaultValue = "1") @Min(value = 1, message = "Invalid page value: must be >= 1") int page,
+            @RequestParam(defaultValue = "20") @Min(value = 1, message = "Invalid size value: must be >= 1 ")
+            @Max(value = 100, message = "Invalid size value: must be <= 100") int size) {
+        return ResponseEntity.ok(taskService.listTasks(status, PageRequest.of(page - 1, size)));
     }
 
 }

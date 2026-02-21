@@ -94,7 +94,7 @@ public class TaskService {
                 .toList();
 
         PageInfo pageInfo = new PageInfo(
-                taskEntities.getNumber(),
+                taskEntities.getNumber() + 1,
                 taskEntities.getSize(),
                 taskEntities.getTotalElements(),
                 taskEntities.getTotalPages()
