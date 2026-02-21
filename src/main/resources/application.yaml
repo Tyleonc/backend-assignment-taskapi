@@ -20,3 +20,9 @@ spring:
 # define redis properties here
 
 # define rocketmq properties here
+rocketmq:
+  namesrvAddr: ${NAMESRV_ADDR:localhost:9876}
+
+  producer:
+    group: task-trigger-group
+    topic: task-schedule-topic
