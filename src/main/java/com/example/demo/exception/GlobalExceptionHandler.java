@@ -17,16 +17,20 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler({TaskExistsException.class, TaskUncancelableException.class})
-    public ProblemDetail handleConflict(Exception ex, HttpServletRequest request) {
-        String title = (ex instanceof TaskExistsException) ? "Duplicate Task ID" : "Task State Conflict";
-        return createDetail(HttpStatus.CONFLICT, title, ex.getMessage(), request);
+    @ExceptionHandler(ApiException.class)
+    public ProblemDetail handleApiException(ApiException ex, HttpServletRequest request) {
+        ErrorCode code = ex.getCode();
+        ProblemDetail detail = ProblemDetail.forStatusAndDetail(code.getStatus(), ex.getMessage());
+        detail.setTitle(code.getTitle());
+        detail.setType(URI.create("https://api.example.com/problems/" + code.getPath()));
+        detail.setInstance(URI.create(request.getRequestURI()));
+        return detail;
     }
 
-    @ExceptionHandler({InvalidTaskStatusException.class, ConstraintViolationException.class})
-    public ProblemDetail handleBadRequest(Exception ex, HttpServletRequest request) {
-        String title = (ex instanceof InvalidTaskStatusException) ? "Invalid Task Status" : "Invalid Request Parameter";
-        return createDetail(HttpStatus.BAD_REQUEST, title, ex.getMessage(), request);
+    @ExceptionHandler({ConstraintViolationException.class})
+    public ProblemDetail handleBadRequest(ConstraintViolationException ex, HttpServletRequest request) {
+        //TODO: refactor to precise catch error from controller
+        return createDetail(HttpStatus.BAD_REQUEST, "Invalid Request Parameter", ex.getMessage(), request);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -39,11 +43,6 @@ public class GlobalExceptionHandler {
 
         detail.setProperty("errors", errors);
         return detail;
-    }
-
-    @ExceptionHandler(TaskNotFoundException.class)
-    public ProblemDetail handleTaskNotFound(TaskNotFoundException ex, HttpServletRequest request) {
-        return createDetail(HttpStatus.NOT_FOUND, "Task Not Found", ex.getMessage(), request);
     }
 
     private ProblemDetail createDetail(HttpStatus status, String title, String message, HttpServletRequest request) {
