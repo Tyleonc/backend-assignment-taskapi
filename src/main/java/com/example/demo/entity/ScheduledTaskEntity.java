@@ -4,6 +4,7 @@ import com.example.demo.model.Payload;
 import com.example.demo.model.TaskStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
@@ -15,11 +16,15 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
 
 @Getter
 @Setter
+@EntityListeners(AuditingEntityListener.class)
 @Entity
 @Table(
   name = "scheduled_tasks",
@@ -46,9 +51,11 @@ public class ScheduledTaskEntity {
     private TaskStatus status = TaskStatus.PENDING;
 
     @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "DATETIME(3)")
+    @CreatedDate
     private Instant createdAt;
 
     @Column(name = "updated_at", nullable = false, columnDefinition = "DATETIME(3)")
+    @LastModifiedDate
     private Instant updatedAt;
 
 }
