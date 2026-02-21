@@ -1,7 +1,7 @@
 package com.example.demo.exception;
 
-public class TaskNotFoundException extends RuntimeException {
+public class TaskNotFoundException extends ApiException {
     public TaskNotFoundException(String taskId) {
-        super(String.format("task not found (taskId: %s)", taskId));
+        super(ErrorCode.NOT_FOUND, String.format("task not found (taskId: %s)", taskId));
     }
 }
