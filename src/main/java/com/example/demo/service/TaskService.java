@@ -3,6 +3,7 @@ package com.example.demo.service;
 import com.example.demo.entity.ScheduledTaskEntity;
 import com.example.demo.exception.TaskExistsException;
 import com.example.demo.exception.TaskNotFoundException;
+import com.example.demo.exception.TaskUncancelableException;
 import com.example.demo.model.TaskStatus;
 import com.example.demo.model.request.CreateTaskRequest;
 import com.example.demo.model.response.ListTaskResponse;
@@ -64,8 +65,20 @@ public class TaskService {
                 .orElseThrow(() -> new TaskNotFoundException(taskId));
     }
 
+    @Transactional
     public void cancelTask(String taskId) {
-        //TODO: implement logic
+        ScheduledTaskEntity entity = taskRepository.findByTaskId(taskId).orElseThrow(() -> new TaskNotFoundException(taskId));
+
+        TaskStatus entityStatus = entity.getStatus();
+        if (entityStatus == TaskStatus.CANCELLED) {
+            return;
+        }
+
+        if (entityStatus != TaskStatus.PENDING) {
+            throw new TaskUncancelableException(taskId, entityStatus);
+        }
+
+        entity.setStatus(TaskStatus.CANCELLED);
     }
 
     public ListTaskResponse listTasks(TaskStatus status, Pageable pageable) {
