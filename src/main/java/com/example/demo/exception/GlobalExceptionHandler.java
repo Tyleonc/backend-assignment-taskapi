@@ -1,6 +1,7 @@
 package com.example.demo.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -72,6 +73,16 @@ public class GlobalExceptionHandler {
         detail.setInstance(URI.create(request.getRequestURI()));
         detail.setProperty("timestamp", Instant.now());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(detail);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ProblemDetail> handleConstraintViolation(ConstraintViolationException ex, HttpServletRequest request) {
+        ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+        detail.setType(URI.create(""));
+        detail.setTitle("Invalid Request Parameter");
+        detail.setInstance(URI.create(request.getRequestURI()));
+        detail.setProperty("timestamp", Instant.now());
+        return ResponseEntity.badRequest().body(detail);
     }
 
 }
