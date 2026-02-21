@@ -64,4 +64,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(detail);
     }
 
+    @ExceptionHandler(TaskUncancelableException.class)
+    public ResponseEntity<ProblemDetail> handleTaskUncancelable(TaskUncancelableException ex, HttpServletRequest request) {
+        ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+        detail.setType(URI.create(""));
+        detail.setTitle("Task State Conflict");
+        detail.setInstance(URI.create(request.getRequestURI()));
+        detail.setProperty("timestamp", Instant.now());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(detail);
+    }
+
 }
