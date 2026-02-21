@@ -87,7 +87,9 @@ public class TaskService {
     @Transactional(readOnly = true)
     public ListTaskResponse listTasks(TaskStatus status, Pageable pageable) {
         TaskStatus queryStatus = (status == null) ? TaskStatus.PENDING : status;
-        Page<ScheduledTaskEntity> taskEntities = taskRepository.findByStatus(queryStatus, pageable);
+        Page<ScheduledTaskEntity> taskEntities = (queryStatus == TaskStatus.PENDING) ?
+                taskRepository.findByStatusAndExecuteAtAfter(TaskStatus.PENDING, Instant.now(), pageable) :
+                taskRepository.findByStatus(queryStatus, pageable);
 
         List<TaskResponse> data = taskEntities.getContent().stream()
                 .map(this::toTaskResponse)
