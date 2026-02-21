@@ -22,6 +22,7 @@ public class GlobalExceptionHandler {
         ErrorCode code = ex.getCode();
         ProblemDetail detail = ProblemDetail.forStatusAndDetail(code.getStatus(), ex.getMessage());
         detail.setTitle(code.getTitle());
+        //TODO: extract path to application.yml
         detail.setType(URI.create("https://api.example.com/problems/" + code.getPath()));
         detail.setInstance(URI.create(request.getRequestURI()));
         return detail;
