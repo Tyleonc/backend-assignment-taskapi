@@ -61,9 +61,9 @@ class TaskControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.status").value(409))
-                .andExpect(jsonPath("$.error").value("Conflict"))
-                .andExpect(jsonPath("$.message").value("Task already exists: abc-123"))
-                .andExpect(jsonPath("$.path").value("/tasks"));
+                .andExpect(jsonPath("$.title").value("Duplicate Task ID"))
+                .andExpect(jsonPath("$.detail").value("Task already exists: abc-123"))
+                .andExpect(jsonPath("$.instance").value("/tasks"));
     }
 
     private CreateTaskRequest createRequest() {
