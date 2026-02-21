@@ -43,7 +43,7 @@ public class ScheduledTaskEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private TaskStatus status;
+    private TaskStatus status = TaskStatus.PENDING;
 
     @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "DATETIME(3)")
     private Instant createdAt;
