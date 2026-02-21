@@ -8,13 +8,13 @@ import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
 
 public record CreateTaskRequest(
-        @NotBlank
+        @NotBlank(message = "taskId must not be null or blank")
         String taskId,
 
         @NotNull
-        @Future
+        @Future(message = "Schedule time must be future time")
         Instant executeAt,
 
-        @NotNull
+        @NotNull(message = "Payload must be provided")
         Payload payload
 ) {}
