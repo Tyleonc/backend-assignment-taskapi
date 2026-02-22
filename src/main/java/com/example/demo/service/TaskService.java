@@ -5,16 +5,17 @@ import com.example.demo.exception.TaskExistsException;
 import com.example.demo.exception.TaskNotFoundException;
 import com.example.demo.exception.TaskUncancelableException;
 import com.example.demo.model.TaskStatus;
+import com.example.demo.model.event.CreateTaskEvent;
 import com.example.demo.model.request.CreateTaskRequest;
 import com.example.demo.model.response.ListTaskResponse;
 import com.example.demo.model.response.PageInfo;
 import com.example.demo.model.response.TaskResponse;
 import com.example.demo.repository.TaskRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,14 +26,12 @@ import java.util.List;
 @Slf4j
 public class TaskService {
 
-    private static final String REDIS_TASK_KEY = "tasks:delayed";
-
     private final TaskRepository taskRepository;
-    private final StringRedisTemplate redisTemplate;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public TaskService(TaskRepository taskRepository, StringRedisTemplate redisTemplate) {
+    public TaskService(TaskRepository taskRepository, ApplicationEventPublisher eventPublisher) {
         this.taskRepository = taskRepository;
-        this.redisTemplate = redisTemplate;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional
@@ -55,8 +54,7 @@ public class TaskService {
             throw new TaskExistsException(taskId);
         }
 
-        long score = request.executeAt().toEpochMilli();
-        redisTemplate.opsForZSet().add(REDIS_TASK_KEY, taskId, score);
+        eventPublisher.publishEvent(new CreateTaskEvent(taskId, request.executeAt()) );
     }
 
     @Transactional(readOnly = true)
