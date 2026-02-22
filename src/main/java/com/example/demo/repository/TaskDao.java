@@ -33,12 +33,25 @@ public class TaskDao {
         String getTaskSql = """
             SELECT task_id, payload
               FROM scheduled_tasks
-             WHERE claim_by = :appId AND status = 'PROCESSING' AND task_id IN (:ids)
+             WHERE claim_by = :appId AND status = 'PROCESSING' AND task_id IN (:taskIds)
              LIMIT :batch
         """;
 
         return jdbcTemplate.query(getTaskSql, param,
                 (rs, rowNum) -> new ClaimedTask(rs.getString("task_id"),rs.getString("payload")));
+    }
+
+    public void markTriggered(Collection<String> successTaskIds, String appId) {
+        String sql = """
+                UPDATE scheduled_tasks
+                   SET status = 'TRIGGERED'
+                 WHERE task_id IN (:taskIds) AND status = 'PROCESSING' AND claim_by = :appId
+                """;
+
+        MapSqlParameterSource param = new MapSqlParameterSource()
+                .addValue("taskIds", successTaskIds)
+                .addValue("appId", appId);
+        jdbcTemplate.update(sql, param);
     }
 
 }
