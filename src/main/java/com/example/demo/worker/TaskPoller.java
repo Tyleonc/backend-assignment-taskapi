@@ -54,7 +54,9 @@ public class TaskPoller {
             return;
         }
         log.info("scheduler-{} claimed {} tasks", appId, claimedTaskList.size());
-        taskRedisRepository.removeClaimedTasks(claimedTaskList.stream().map(ClaimedTask::taskId).toList());
+
+        String[] claimedTaskIds = claimedTaskList.stream().map(ClaimedTask::taskId).toArray(String[]::new);
+        taskRedisRepository.removeClaimedTasks(claimedTaskIds);
 
         List<String> successIds = new ArrayList<>();
         for (ClaimedTask task : claimedTaskList) {
@@ -63,6 +65,7 @@ public class TaskPoller {
                 mqPublisher.publish(task.taskId(), task.payload());
                 successIds.add(task.taskId());
             } catch (Exception e) {
+                log.error("Failed to send message, release claimed task {}", task.taskId());
                 // TODO: release claim
 //                taskDao.releaseClaim(task.taskId());
             }
