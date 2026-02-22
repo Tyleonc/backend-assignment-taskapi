@@ -26,7 +26,6 @@ public class RocketMQPublisher {
     }
 
 
-    //TODO: not finished
     public <T> SendResult publish(String taskId, T payload) throws JsonProcessingException, MQBrokerException, RemotingException, InterruptedException, MQClientException {
 
         byte[] body = objectMapper.writeValueAsBytes(payload);
