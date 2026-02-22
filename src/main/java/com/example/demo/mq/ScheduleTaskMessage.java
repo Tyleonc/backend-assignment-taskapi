@@ -1,8 +1,5 @@
 package com.example.demo.mq;
 
-
-import com.example.demo.model.Payload;
-
 import java.time.Instant;
 
 public record ScheduleTaskMessage(
@@ -10,5 +7,5 @@ public record ScheduleTaskMessage(
         Instant sentAt,
         String source,
         String version,
-        Payload payload
+        String payload
 ) {}
