@@ -5,6 +5,7 @@ import com.example.demo.repository.ClaimedTask;
 import com.example.demo.repository.TaskDao;
 import com.example.demo.repository.TaskRedisRepository;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -15,8 +16,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+@Slf4j
 @Component
-public class TaskScheduler {
+public class TaskPoller {
 
     private static final long REDIS_BATCH_SIZE = 100L;
     private static final int DB_BATCH_SIZE = 100;
@@ -27,8 +29,8 @@ public class TaskScheduler {
 
     private final RocketMQPublisher mqPublisher;
 
-    public TaskScheduler(TaskRedisRepository taskRedisRepository, TaskDao taskDao, @Qualifier("appId") String appId,
-                         RocketMQPublisher mqPublisher) {
+    public TaskPoller(TaskRedisRepository taskRedisRepository, TaskDao taskDao, @Qualifier("appId") String appId,
+                      RocketMQPublisher mqPublisher) {
         this.taskRedisRepository = taskRedisRepository;
         this.taskDao = taskDao;
         this.appId = appId;
@@ -39,15 +41,19 @@ public class TaskScheduler {
     @Scheduled(fixedDelay = 1000)
     public void schedule() {
 
+        log.info("try finding task ");
+
         Set<String> dueTask = taskRedisRepository.getDueTaskBatch(Instant.now(), REDIS_BATCH_SIZE);
         if (CollectionUtils.isEmpty(dueTask)) {
             return;
         }
+        log.info("{} due task found", dueTask.size());
 
         List<ClaimedTask> claimedTaskList = taskDao.claimTask(dueTask, appId, DB_BATCH_SIZE);
         if(CollectionUtils.isEmpty(claimedTaskList)) {
             return;
         }
+        log.info("scheduler-{} claimed {} tasks", appId, claimedTaskList.size());
 
         List<String> successIds = new ArrayList<>();
         for (ClaimedTask task : claimedTaskList) {
