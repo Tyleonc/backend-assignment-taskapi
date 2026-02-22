@@ -27,6 +27,10 @@ public class TaskRedisRepository {
         return ops.rangeByScore(DELAY_QUEUE_KEY, 0D, now.toEpochMilli(), 0L, batch);
     }
 
+    public void removeSingleTask(String taskId) {
+        redisTemplate.opsForZSet().remove(DELAY_QUEUE_KEY, taskId);
+    }
+
     public void removeClaimedTasks(String[] claimedTaskIds) {
         redisTemplate.opsForZSet().remove(DELAY_QUEUE_KEY, (Object[]) claimedTaskIds);
     }
