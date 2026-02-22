@@ -5,10 +5,13 @@ import com.example.demo.repository.ClaimedTask;
 import com.example.demo.repository.TaskDao;
 import com.example.demo.repository.TaskRedisRepository;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.rocketmq.client.exception.MQBrokerException;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.client.producer.SendStatus;
+import org.apache.rocketmq.remoting.exception.RemotingException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -62,6 +65,7 @@ public class TaskPoller {
 
         List<String> successTaskIds = new ArrayList<>();
         List<String> retryTaskIds = new ArrayList<>();
+        List<String> failedTaskIds = new ArrayList<>();
         for (ClaimedTask task : claimedTaskList) {
             try {
                 //TODO: use custom message model
@@ -71,13 +75,24 @@ public class TaskPoller {
                 }else {
                     retryTaskIds.add(task.taskId());
                 }
+            } catch (JsonProcessingException e) {
+                log.error("Failed to parse message, taskId: {}", task.taskId());
+                failedTaskIds.add(task.taskId());
+            } catch (MQBrokerException | RemotingException e) {
+                log.error("Message queue is unavailable: {}", e.getMessage());
+                retryTaskIds.add(task.taskId());
             } catch (Exception e) {
-                log.error(e.getMessage());
+                log.error("Unknown error: {}", e.getMessage());
                 retryTaskIds.add(task.taskId());
             }
         }
 
-        if (CollectionUtils.isNotEmpty(successTaskIds)) {
+        if (CollectionUtils.isNotEmpty(failedTaskIds)) {
+            //TODO: set task to failed
+        }
+
+
+        if (CollectionUtils.isNotEmpty(retryTaskIds)) {
             //TODO: introduce new status to differentiate from processing for retry
         }
 
