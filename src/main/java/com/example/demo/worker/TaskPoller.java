@@ -65,6 +65,7 @@ public class TaskPoller {
                 mqPublisher.publish(task.taskId(), task.payload());
                 successIds.add(task.taskId());
             } catch (Exception e) {
+                log.error(e.getMessage());
                 log.error("Failed to send message, release claimed task {}", task.taskId());
                 // TODO: release claim
 //                taskDao.releaseClaim(task.taskId());
