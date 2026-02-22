@@ -44,7 +44,7 @@ public class TaskDao {
     public void markTriggered(Collection<String> successTaskIds, String appId) {
         String sql = """
                 UPDATE scheduled_tasks
-                   SET status = 'TRIGGERED'
+                   SET status = 'TRIGGERED', triggered_at = NOW()
                  WHERE task_id IN (:taskIds) AND status = 'PROCESSING' AND claim_by = :appId
                 """;
 
