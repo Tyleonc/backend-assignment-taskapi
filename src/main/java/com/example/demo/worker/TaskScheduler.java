@@ -5,10 +5,10 @@ import com.example.demo.repository.ClaimedTask;
 import com.example.demo.repository.TaskDao;
 import com.example.demo.repository.TaskRedisRepository;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -61,7 +61,9 @@ public class TaskScheduler {
             }
         }
 
-        //TODO: mark task as triggered
+        if (CollectionUtils.isNotEmpty(successIds)) {
+            taskDao.markTriggered(successIds, appId);
+        }
 
     }
 
