@@ -26,10 +26,11 @@ public class RocketMQPublisher {
     }
 
 
-    public <T> SendResult publish(String taskId, T payload) throws JsonProcessingException, MQBrokerException, RemotingException, InterruptedException, MQClientException {
+    public SendResult publish(String taskId, ScheduleTaskMessage taskMessage) throws JsonProcessingException, MQBrokerException, RemotingException, InterruptedException, MQClientException {
 
-        byte[] body = objectMapper.writeValueAsBytes(payload);
+        byte[] body = objectMapper.writeValueAsBytes(taskMessage);
         Message msg = new Message(TOPIC, "email", body);
+        msg.setKeys(taskMessage.taskId());
 
         SendResult result = producer.send(msg, 2000);
 
