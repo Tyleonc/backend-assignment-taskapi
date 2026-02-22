@@ -54,7 +54,7 @@ public class TaskService {
             throw new TaskExistsException(taskId);
         }
 
-        eventPublisher.publishEvent(new CreateTaskEvent(taskId, request.executeAt()) );
+        eventPublisher.publishEvent(new CreateTaskEvent(taskId, request.executeAt()));
     }
 
     @Transactional(readOnly = true)
