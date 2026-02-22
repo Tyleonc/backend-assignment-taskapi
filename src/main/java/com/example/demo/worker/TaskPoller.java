@@ -7,6 +7,8 @@ import com.example.demo.repository.TaskRedisRepository;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.rocketmq.client.producer.SendResult;
+import org.apache.rocketmq.client.producer.SendStatus;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -58,22 +60,30 @@ public class TaskPoller {
         String[] claimedTaskIds = claimedTaskList.stream().map(ClaimedTask::taskId).toArray(String[]::new);
         taskRedisRepository.removeClaimedTasks(claimedTaskIds);
 
-        List<String> successIds = new ArrayList<>();
+        List<String> successTaskIds = new ArrayList<>();
+        List<String> retryTaskIds = new ArrayList<>();
         for (ClaimedTask task : claimedTaskList) {
             try {
                 //TODO: use custom message model
-                mqPublisher.publish(task.taskId(), task.payload());
-                successIds.add(task.taskId());
+                SendResult result = mqPublisher.publish(task.taskId(), task.payload());
+                if (SendStatus.SEND_OK == result.getSendStatus()) {
+                    successTaskIds.add(task.taskId());
+                }else {
+                    retryTaskIds.add(task.taskId());
+                }
             } catch (Exception e) {
                 log.error(e.getMessage());
-                log.error("Failed to send message, release claimed task {}", task.taskId());
-                // TODO: release claim
-//                taskDao.releaseClaim(task.taskId());
+                retryTaskIds.add(task.taskId());
             }
         }
 
-        if (CollectionUtils.isNotEmpty(successIds)) {
-            taskDao.markTriggered(successIds, appId);
+        if (CollectionUtils.isNotEmpty(successTaskIds)) {
+            //TODO: introduce new status to differentiate from processing for retry
+        }
+
+
+        if (CollectionUtils.isNotEmpty(successTaskIds)) {
+            taskDao.markTriggered(successTaskIds, appId);
         }
 
     }
