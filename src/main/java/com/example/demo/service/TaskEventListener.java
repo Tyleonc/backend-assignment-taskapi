@@ -11,11 +11,11 @@ import java.time.Instant;
 
 @Component
 @Slf4j
-public class CreateTaskEventListener {
+public class TaskEventListener {
 
     private final TaskRedisRepository taskRedisRepository;
 
-    public CreateTaskEventListener(TaskRedisRepository taskRedisRepository) {
+    public TaskEventListener(TaskRedisRepository taskRedisRepository) {
         this.taskRedisRepository = taskRedisRepository;
     }
 
