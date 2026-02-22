@@ -10,6 +10,9 @@ CREATE TABLE scheduled_tasks (
     status ENUM('PENDING','PROCESSING','TRIGGERED','FAILED','CANCELLED') NOT NULL DEFAULT 'PENDING',
     created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     updated_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
-    UNIQUE KEY uq_task_id (task_id)
+    triggered_at datetime(3) DEFAULT NULL,
+    UNIQUE KEY uq_task_id (task_id),
+    KEY idx_due_task (status, execute_at) USING BTREE,
+    KEY idx_claim_owner (status, claim_by, task_id) USING BTREE
 );
 
