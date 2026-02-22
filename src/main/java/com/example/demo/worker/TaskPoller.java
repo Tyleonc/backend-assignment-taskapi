@@ -1,11 +1,13 @@
 package com.example.demo.worker;
 
 import com.example.demo.mq.RocketMQPublisher;
+import com.example.demo.mq.ScheduleTaskMessage;
 import com.example.demo.repository.ClaimedTask;
 import com.example.demo.repository.TaskDao;
 import com.example.demo.repository.TaskRedisRepository;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.rocketmq.client.exception.MQBrokerException;
@@ -31,15 +33,16 @@ public class TaskPoller {
     private final TaskRedisRepository taskRedisRepository;
     private final TaskDao taskDao;
     private final String appId;
-
     private final RocketMQPublisher mqPublisher;
+    private final ObjectMapper mapper;
 
     public TaskPoller(TaskRedisRepository taskRedisRepository, TaskDao taskDao, @Qualifier("appId") String appId,
-                      RocketMQPublisher mqPublisher) {
+                      RocketMQPublisher mqPublisher, ObjectMapper mapper) {
         this.taskRedisRepository = taskRedisRepository;
         this.taskDao = taskDao;
         this.appId = appId;
         this.mqPublisher = mqPublisher;
+        this.mapper = mapper;
     }
 
 
@@ -68,8 +71,8 @@ public class TaskPoller {
         List<String> failedTaskIds = new ArrayList<>();
         for (ClaimedTask task : claimedTaskList) {
             try {
-                //TODO: use custom message model
-                SendResult result = mqPublisher.publish(task.taskId(), task.payload());
+                ScheduleTaskMessage message = new ScheduleTaskMessage(task.taskId(), Instant.now(), "task-api", "v1", task.payload());
+                SendResult result = mqPublisher.publish(task.taskId(), message);
                 if (SendStatus.SEND_OK == result.getSendStatus()) {
                     successTaskIds.add(task.taskId());
                 }else {
