@@ -54,6 +54,7 @@ public class TaskPoller {
             return;
         }
         log.info("scheduler-{} claimed {} tasks", appId, claimedTaskList.size());
+        taskRedisRepository.removeClaimedTasks(claimedTaskList.stream().map(ClaimedTask::taskId).toList());
 
         List<String> successIds = new ArrayList<>();
         for (ClaimedTask task : claimedTaskList) {
