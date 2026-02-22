@@ -5,7 +5,6 @@ import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
-import java.util.Collection;
 import java.util.Set;
 
 @Repository
@@ -28,8 +27,8 @@ public class TaskRedisRepository {
         return ops.rangeByScore(DELAY_QUEUE_KEY, 0D, now.toEpochMilli(), 0L, batch);
     }
 
-    public void removeClaimedTasks(Collection<String> claimedTaskIds) {
-        redisTemplate.opsForZSet().remove(DELAY_QUEUE_KEY, claimedTaskIds);
+    public void removeClaimedTasks(String[] claimedTaskIds) {
+        redisTemplate.opsForZSet().remove(DELAY_QUEUE_KEY, (Object[]) claimedTaskIds);
     }
 
 }
