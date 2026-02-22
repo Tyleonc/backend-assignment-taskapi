@@ -5,7 +5,8 @@ import com.example.demo.exception.TaskExistsException;
 import com.example.demo.exception.TaskNotFoundException;
 import com.example.demo.exception.TaskUncancelableException;
 import com.example.demo.model.TaskStatus;
-import com.example.demo.model.event.CreateTaskEvent;
+import com.example.demo.model.event.EventType;
+import com.example.demo.model.event.TaskEvent;
 import com.example.demo.model.request.CreateTaskRequest;
 import com.example.demo.model.response.ListTaskResponse;
 import com.example.demo.model.response.PageInfo;
@@ -54,7 +55,7 @@ public class TaskService {
             throw new TaskExistsException(taskId);
         }
 
-        eventPublisher.publishEvent(new CreateTaskEvent(taskId, request.executeAt()));
+        eventPublisher.publishEvent(new TaskEvent(EventType.CREATE, taskId, request.executeAt()));
     }
 
     @Transactional(readOnly = true)
@@ -78,6 +79,7 @@ public class TaskService {
         }
 
         entity.setStatus(TaskStatus.CANCELLED);
+        eventPublisher.publishEvent(new TaskEvent(EventType.CANCEL, taskId, null));
     }
 
     @Transactional(readOnly = true)
